@@ -6,8 +6,11 @@ export default function CreatePage() {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<"student" | "admin">("student");
+  const [role, setRole] = useState<"student" | "admin" | "counselor">(
+    "student"
+  );
   const [error, setError] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
 
   // Function that runs when form is submitted
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -32,6 +35,12 @@ export default function CreatePage() {
       password === "123"
     ) {
       alert("welcome Admin");
+    } else if (
+      role === "counselor" &&
+      email === "cou@gmail.com" &&
+      password === "123"
+    ) {
+      alert("welcome Counselor");
     }
   });
 
@@ -39,7 +48,7 @@ export default function CreatePage() {
     <main className="flex min-h-screen items-center justify-center oklch(75% 0.183 55.934) ">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-2xl">
         <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
-          Sign up form
+          Sign up
         </h1>
         <div className="mb-6 flex gap-2 rounded-lg bg-gray-100 p-1">
           <button
@@ -73,6 +82,22 @@ export default function CreatePage() {
             Admin
           </button>
         </div>
+        <div className="mb-6 flex gap-2 rounded-lg bg-gray-100 p-1">
+          <button
+            type="button"
+            onClick={() => {
+              setRole("counselor");
+              setError("Use your credentials");
+            }}
+            className={`flex-1 rounded-md px-4 py-2 text-sm font-semibold transition-all ${
+              role === "counselor"
+                ? "bg-orange-500 text-white shadow-md"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+          >
+            Counselor
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -80,7 +105,7 @@ export default function CreatePage() {
               htmlFor="name"
               className="mb-1 block text-sm font-medium text-gray-600"
             >
-              Full NAMES
+              Full names
             </label>
             <input
               id="name"
@@ -88,7 +113,6 @@ export default function CreatePage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outlone-none"
-              
             />
           </div>
           <div>
@@ -105,7 +129,7 @@ export default function CreatePage() {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none"
               placeholder={
-                role === "student" ? "stude@gmail.com" : "admi@gmail.com"
+                role === "student" ? "stude@gmail.com" : role === "admin" ? "admi@gmail.com" : "cou@gmail.com"
               }
             />
           </div>
@@ -122,23 +146,27 @@ export default function CreatePage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none"
-              placeholder="••••••••"
+              placeholder="Enter your password"
             />
           </div>
           <div>
             <label
-              htmlFor="password"
+              htmlFor="ConfirmPassword"
               className="block text-sm font-medium text-gray-700"
             >
               Confirm Password
             </label>
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none"
-              placeholder="••••••••"
+              placeholder="Re-enter your password "
             />
+            {confirmPassword && password !== confirmPassword && (
+              <p className="text-red-500 text-sm">Password don't match!</p>
+            )}
           </div>
 
           {error && (
@@ -150,12 +178,17 @@ export default function CreatePage() {
             type="submit"
             className="w-full rounded-md bg-600 py-2 font-semibold text-white bg-orange-500"
           >
-            {" "}
-            Create account
+            <a href="">Create account</a>
           </button>
-          <button className="w-full rounded-md py-2 font-semibold text-white bg-orange-500">
-            <a href="/Login">Back to Login</a>
-          </button>
+          <div className="text-center">
+            <span className="text-gray-600">Already have an account? </span>
+            <a
+              href="/Signin"
+              className="text-orange-500 hover:text-orange-600 font-semibold"
+            >
+              Sign in
+            </a>
+          </div>
         </form>
       </div>
     </main>

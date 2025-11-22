@@ -1,0 +1,224 @@
+"use client";
+import { useState } from "react";
+import { Heart, Phone, Mail, MessageCircle } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+export default function GetHelpPage() {
+  return (
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <section className="py-20 px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="flex justify-center mb-6">
+            <div className="bg-pink-200 text-pink-600 w-20 h-20 rounded-2xl flex items-center justify-center">
+              <Heart className="w-10 h-10" />
+            </div>
+          </div>
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-800 mb-6">
+            We are here to help
+          </h1>
+          <p className="text-lg lg:text-xl text-gray-600 leading-relaxed">
+            Reach out and connect with our caring counselors and support groups.
+          </p>
+        </div>
+      </section>
+      <section className="py-20 px-6 lg:px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center hover:shadow-lg transition-shadow duration-300">
+              <div className="flex justify-center mb-6">
+                <div className="bg-orange-100 text-orange-600 w-16 h-16 rounded-2xl flex items-center justify-center">
+                  <Phone className="w-8 h-8" />
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Call Us</h2>
+              <p className="text-gray-600 mb-4">Helpline</p>
+              <a
+                href="tel:+250791279477"
+                className="text-orange-500 text-xl font-semibold hover:text-orange-600 transition"
+              >
+                +250 (791) 279477
+              </a>
+            </div>
+
+            {/* Send Email */}
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="bg-pink-200 text-pink-600 w-16 h-16 rounded-2xl flex items-center justify-center">
+                  <Mail className="w-8 h-8" />
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Email Us
+              </h2>
+              <p className="text-gray-600 mb-4"> Quick Response</p>
+              <a
+                href="mailto:help@hopefoundation.org"
+                className="text-orange-500 text-xl font-semibold hover:text-orange-600 transition"
+              >
+                hopefoundation@.org
+              </a>
+            </div>
+
+            {/* Live Chat */}
+            <div className="text-center">
+              <div className="flex justify-center mb-6">
+                <div className="bg-yellow-100 text-yellow-600 w-16 h-16 rounded-2xl flex items-center justify-center">
+                  <MessageCircle className="w-8 h-8" />
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                Live Chat
+              </h2>
+              <p className="text-gray-600 mb-4">Chat with a Counselor</p>
+              <button className="bg-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-600 transition">
+                Start Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Request Support Form */}
+      <section className="py-20 px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+              Request Support
+            </h2>
+            <p className="text-lg text-gray-600">
+              Fill out this form and a counselor will reach out to you. All
+              information is confidential.
+            </p>
+          </div>
+
+          <form className="bg-white rounded-2xl p-8 shadow-sm">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                    placeholder="Enter your name"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="age"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
+                    Age
+                  </label>
+                  <input
+                    type="number"
+                    id="age"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                    placeholder="Your age"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="phone"
+                    className="block text-gray-700 font-medium mb-2"
+                  >
+                    Phone (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                    placeholder="+1 (555) 000-0000"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="message"
+                  className="block text-gray-700 font-medium mb-2"
+                >
+                  How can we help you?
+                </label>
+                <textarea
+                  id="message"
+                  rows={6}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                  placeholder="Tell us what you're going through... Your message is confidential."
+                ></textarea>
+              </div>
+
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <p className="text-sm text-gray-700">
+                  <strong>Your privacy is important:</strong> All communications
+                  are confidential and secure. We never share your information
+                  without your permission.
+                </p>
+              </div>
+              <button
+                type="submit"
+                className="bg-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-600 transition text-lg"
+              >
+                Submit Request
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section className="py-20 px-6 lg:px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-gradient-to-r from-orange-400 via-orange-300 to-pink-200 rounded-3xl p-10 text-white">
+            <h2 className="text-3xl font-bold mb-4">Crisis Support</h2>
+            <p className="text-white/90 text-lg mb-6">
+              If you're in immediate danger or having thoughts of self-harm,
+              please call our 24/7 crisis line or emergency services
+              immediately.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <a
+                href="tel:+250791279477"
+                className="bg-pink-200 text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-pink-300 transition"
+              >
+                Call Crisis Hotline: 911-HELP
+              </a>
+              <a
+                href="tel:911"
+                className="bg-white text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition"
+              >
+                Emergency: 911
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <Footer />
+    </div>
+  );
+}

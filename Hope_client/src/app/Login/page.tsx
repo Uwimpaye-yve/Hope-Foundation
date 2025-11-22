@@ -5,7 +5,7 @@ import { useState } from "react";
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<"student" | "admin">("student");
+  
   const [error, setError] = useState<string>("");
 
   // Function that runs when form is submitted
@@ -17,22 +17,7 @@ export default function LoginPage() {
       setError("Please fill in all fields");
       return;
     }
-  };
-  setTimeout(() => {
-    if (
-      role === "student" &&
-      email === "bebe@gmail.com" &&
-      password === "123"
-    ) {
-      alert("welcome student");
-    } else if (
-      role === "admin" &&
-      email === "admin@gmail.com" &&
-      password === "123"
-    ) {
-      alert("welcome Admin");
-    }
-  });
+  };  
 
   return (
     <main className="flex min-h-screen items-center justify-center oklch(75% 0.183 55.934) ">
@@ -40,38 +25,6 @@ export default function LoginPage() {
         <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
           Sign in
         </h1>
-        <div className="mb-6 flex gap-2 rounded-lg bg-gray-100 p-1">
-          <button
-            type="button"
-            onClick={() => {
-              setRole("student");
-              setError("");
-            }}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-semibold transition-all ${
-              role === "student"
-                ? "bg-orange-500 text-white shadow-md"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-          >
-            Student
-          </button>
-        </div>
-        <div className="mb-6 flex gap-2 rounded-lg bg-gray-100 p-1">
-          <button
-            type="button"
-            onClick={() => {
-              setRole("admin");
-              setError("");
-            }}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-semibold transition-all ${
-              role === "admin"
-                ? "bg-orange-500 text-white shadow-md"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-          >
-            Admin
-          </button>
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -87,9 +40,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none"
-              placeholder={
-                role === "student" ? "stude@gmail.com" : "admi@gmail.com"
-              }
+              
             />
           </div>
           <div>
@@ -114,13 +65,20 @@ export default function LoginPage() {
               {error}
             </div>
           )}
+          <div className="text-center">
+            <a href="" className="text-orange-500 hover:text-orange-600 font-medium">Forgot Password?</a>
+          </div>
           <button
             type="submit"
             className="w-full rounded-md bg-600 py-2 font-semibold text-white bg-orange-500"
           >
             {" "}
-            Login
+            <a href="">Sign in</a>
           </button>
+          <div className="text-center">
+            <span className="text-gray-600">Don't have an account? </span>
+            <a href="/Signup" className="text-orange-500 hover:text-orange-600 font-semibold">Signup</a>
+          </div>
         </form>
         
         <div className="mt-6 text-center">
