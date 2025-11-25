@@ -31,7 +31,7 @@ interface Achievement {
 }
 
 export default function StudentDashboard() {
-  const studentName = "Sarah";
+  const studentName = "Student";
 
   const programs: Program[] = [
     {

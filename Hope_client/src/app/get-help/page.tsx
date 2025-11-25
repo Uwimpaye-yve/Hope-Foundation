@@ -5,6 +5,75 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export default function GetHelpPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    age: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess(false);
+
+    try {
+      const response = await fetch(`${API_URL}/support-requests`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          priority: "Medium", // You can add a dropdown for this
+          category: "General Support", // You can add a dropdown for this
+          subject: `Support request from ${formData.name}`,
+          description: `Name: ${formData.name}\nAge: ${formData.age}\nEmail: ${
+            formData.email
+          }\nPhone: ${formData.phone || "Not provided"}\n\nMessage:\n${
+            formData.message
+          }`,
+          status: "Pending",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit request");
+      }
+
+      setSuccess(true);
+      setFormData({
+        name: "",
+        age: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -23,9 +92,11 @@ export default function GetHelpPage() {
           </p>
         </div>
       </section>
+
       <section className="py-20 px-6 lg:px-8 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Call Us */}
             <div className="text-center hover:shadow-lg transition-shadow duration-300">
               <div className="flex justify-center mb-6">
                 <div className="bg-orange-100 text-orange-600 w-16 h-16 rounded-2xl flex items-center justify-center">
@@ -42,7 +113,7 @@ export default function GetHelpPage() {
               </a>
             </div>
 
-            {/* Send Email */}
+            {/* Email Us */}
             <div className="text-center">
               <div className="flex justify-center mb-6">
                 <div className="bg-pink-200 text-pink-600 w-16 h-16 rounded-2xl flex items-center justify-center">
@@ -52,12 +123,12 @@ export default function GetHelpPage() {
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 Email Us
               </h2>
-              <p className="text-gray-600 mb-4"> Quick Response</p>
+              <p className="text-gray-600 mb-4">Quick Response</p>
               <a
-                href="mailto:help@hopefoundation.org"
+                href="mailto:hopefoundation@example.org"
                 className="text-orange-500 text-xl font-semibold hover:text-orange-600 transition"
               >
-                hopefoundation@.org
+                hopefoundation@example.org
               </a>
             </div>
 
@@ -93,19 +164,43 @@ export default function GetHelpPage() {
             </p>
           </div>
 
-          <form className="bg-white rounded-2xl p-8 shadow-sm">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-2xl p-8 shadow-sm"
+          >
+            {success && (
+              <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-green-800 font-semibold">
+                  ✓ Your request has been submitted successfully!
+                </p>
+                <p className="text-green-700 text-sm mt-1">
+                  A counselor will reach out to you soon.
+                </p>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800 font-semibold">✗ {error}</p>
+              </div>
+            )}
+
             <div className="space-y-6">
+              {/* Name + Age */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label
                     htmlFor="name"
                     className="block text-gray-700 font-medium mb-2"
                   >
-                    Your Name
+                    Your Name *
                   </label>
                   <input
                     type="text"
                     id="name"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
                     placeholder="Enter your name"
                   />
@@ -116,28 +211,35 @@ export default function GetHelpPage() {
                     htmlFor="age"
                     className="block text-gray-700 font-medium mb-2"
                   >
-                    Age
+                    Age *
                   </label>
                   <input
                     type="number"
                     id="age"
+                    required
+                    value={formData.age}
+                    onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
                     placeholder="Your age"
                   />
                 </div>
               </div>
 
+              {/* Email + Phone */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label
                     htmlFor="email"
                     className="block text-gray-700 font-medium mb-2"
                   >
-                    Email
+                    Email *
                   </label>
                   <input
                     type="email"
                     id="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
                     placeholder="your.email@example.com"
                   />
@@ -153,27 +255,34 @@ export default function GetHelpPage() {
                   <input
                     type="tel"
                     id="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+250 (791) 279477"
                   />
                 </div>
               </div>
 
+              {/* Message */}
               <div>
                 <label
                   htmlFor="message"
                   className="block text-gray-700 font-medium mb-2"
                 >
-                  How can we help you?
+                  How can we help you? *
                 </label>
                 <textarea
                   id="message"
                   rows={6}
+                  required
+                  value={formData.message}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
                   placeholder="Tell us what you're going through... Your message is confidential."
                 ></textarea>
               </div>
 
+              {/* Privacy Notice */}
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
                 <p className="text-sm text-gray-700">
                   <strong>Your privacy is important:</strong> All communications
@@ -181,17 +290,21 @@ export default function GetHelpPage() {
                   without your permission.
                 </p>
               </div>
+
+              {/* Submit */}
               <button
                 type="submit"
-                className="bg-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-600 transition text-lg"
+                disabled={loading}
+                className="bg-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-600 transition text-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Submit Request
+                {loading ? "Submitting..." : "Submit Request"}
               </button>
             </div>
           </form>
         </div>
       </section>
 
+      {/* Crisis Support */}
       <section className="py-20 px-6 lg:px-8 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="bg-gradient-to-r from-orange-400 via-orange-300 to-pink-200 rounded-3xl p-10 text-white">
@@ -201,23 +314,26 @@ export default function GetHelpPage() {
               please call our 24/7 crisis line or emergency services
               immediately.
             </p>
+
             <div className="flex flex-wrap gap-4">
               <a
                 href="tel:+250791279477"
                 className="bg-pink-200 text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-pink-300 transition"
               >
-                Call Crisis Hotline: 911-HELP
+                Call Crisis Hotline: +250 (791) 279477
               </a>
+
               <a
-                href="tel:911"
+                href="tel:112"
                 className="bg-white text-gray-800 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition"
               >
-                Emergency: 911
+                Emergency: 112
               </a>
             </div>
           </div>
         </div>
       </section>
+
       <Footer />
     </div>
   );

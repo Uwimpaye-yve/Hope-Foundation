@@ -2,8 +2,6 @@
 import { useState } from "react";
 import { Users, BookOpen, Heart, TrendingUp, Search, Plus } from "lucide-react";
 
-import AdminLayout from "@/components/dashboard/AdminLayout";
-
 interface Student {
   id: string;
   name: string;
@@ -64,7 +62,6 @@ export default function AdminDashboard() {
   );
 
   return (
-    <AdminLayout>
       <div className="px-6 lg:px-8 py-12">
         <div className="flex justify-between items-start mb-12">
           <div>
@@ -301,6 +298,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+
   );
 }

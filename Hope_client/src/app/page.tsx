@@ -268,13 +268,13 @@ export default function HomePage() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="#"
+                href="/Login"
                 className="px-8 py-3 rounded-full bg-pink-300 text-gray-700 font-medium hover:bg-pink-400 transition"
               >
                 I need support
               </a>
               <a
-                href="#"
+                href="/donate"
                 className="px-8 py-3 rounded-full bg-white text-gray-700 font-medium border border-orange-300 hover:bg-pink-400 transition"
               >
                 I want to Help

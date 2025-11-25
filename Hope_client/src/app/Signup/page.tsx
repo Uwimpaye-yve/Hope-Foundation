@@ -1,51 +1,72 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { authService } from "@/services/api";
 
 export default function CreatePage() {
+  const router = useRouter();
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [role, setRole] = useState<"student" | "admin" | "counselor">(
-    "student"
-  );
+  const [role, setRole] = useState<"student" | "admin" | "counselor">("student");
   const [error, setError] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // Function that runs when form is submitted
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all fields");
       return;
     }
-  };
-  setTimeout(() => {
-    if (
-      role === "student" &&
-      email === "student@gmail.com" &&
-      password === "123"
-    ) {
-      alert("welcome student");
-    } else if (
-      role === "admin" &&
-      email === "admin@gmail.com" &&
-      password === "123"
-    ) {
-      alert("welcome Admin");
-    } else if (
-      role === "counselor" &&
-      email === "cou@gmail.com" &&
-      password === "123"
-    ) {
-      alert("welcome Counselor");
+
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      return;
     }
-  });
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const nameParts = name.trim().split(" ");
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(" ") || nameParts[0];
+
+      const response = await authService.signup({
+        firstName,
+        lastName,
+        email,
+        password,
+        role,
+      });
+
+      authService.saveToken(response.access_token);
+      authService.saveUser(response.user);
+
+      if (role === "student") {
+        router.push("/dashboard/student");
+      } else if (role === "admin") {
+        router.push("/dashboard/admin");
+      } else if (role === "counselor") {
+        router.push("/dashboard/counselor");
+      }
+    } catch (err: any) {
+      setError(err.message || "Signup failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <main className="flex min-h-screen items-center justify-center oklch(75% 0.183 55.934) ">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100">
       <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-2xl">
         <h1 className="mb-6 text-center text-3xl font-bold text-gray-800">
           Sign up
@@ -65,8 +86,6 @@ export default function CreatePage() {
           >
             Student
           </button>
-        </div>
-        <div className="mb-6 flex gap-2 rounded-lg bg-gray-100 p-1">
           <button
             type="button"
             onClick={() => {
@@ -81,13 +100,11 @@ export default function CreatePage() {
           >
             Admin
           </button>
-        </div>
-        <div className="mb-6 flex gap-2 rounded-lg bg-gray-100 p-1">
           <button
             type="button"
             onClick={() => {
               setRole("counselor");
-              setError("Use your credentials");
+              setError("");
             }}
             className={`flex-1 rounded-md px-4 py-2 text-sm font-semibold transition-all ${
               role === "counselor"
@@ -109,16 +126,17 @@ export default function CreatePage() {
             </label>
             <input
               id="name"
-              type="name"
+              type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outlone-none"
+              className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="John Doe"
             />
           </div>
           <div>
             <label
               htmlFor="email"
-              className="mb-1 block text-sm font-medium text-gray-600 "
+              className="mb-1 block text-sm font-medium text-gray-600"
             >
               Email
             </label>
@@ -127,9 +145,13 @@ export default function CreatePage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none"
+              className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder={
-                role === "student" ? "stude@gmail.com" : role === "admin" ? "admi@gmail.com" : "cou@gmail.com"
+                role === "student"
+                  ? "student@gmail.com"
+                  : role === "admin"
+                  ? "admin@gmail.com"
+                  : "counselor@gmail.com"
               }
             />
           </div>
@@ -145,13 +167,13 @@ export default function CreatePage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none"
+              className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Enter your password"
             />
           </div>
           <div>
             <label
-              htmlFor="ConfirmPassword"
+              htmlFor="confirmPassword"
               className="block text-sm font-medium text-gray-700"
             >
               Confirm Password
@@ -161,11 +183,11 @@ export default function CreatePage() {
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none"
-              placeholder="Re-enter your password "
+              className="mt-1 w-full rounded-md border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Re-enter your password"
             />
             {confirmPassword && password !== confirmPassword && (
-              <p className="text-red-500 text-sm">Password don't match!</p>
+              <p className="text-red-500 text-sm mt-1">Passwords don&apos;t match!</p>
             )}
           </div>
 
@@ -176,9 +198,10 @@ export default function CreatePage() {
           )}
           <button
             type="submit"
-            className="w-full rounded-md bg-600 py-2 font-semibold text-white bg-orange-500"
+            disabled={loading}
+            className="w-full rounded-md bg-orange-500 py-2 font-semibold text-white hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed transition-colors"
           >
-            <a href="">Create account</a>
+            {loading ? "Creating account..." : "Create account"}
           </button>
           <div className="text-center">
             <span className="text-gray-600">Already have an account? </span>
