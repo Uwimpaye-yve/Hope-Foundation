@@ -30,7 +30,15 @@ export default function HomePage() {
                 </li> */}
               <li>
                 <a
-                  href="#"
+                  href="/"
+                  className="text-gray-600 hover:text-orange-500 transition"
+                >
+                  Home
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/programs"
                   className="text-gray-600 hover:text-orange-500 transition"
                 >
                   Programs
@@ -38,7 +46,7 @@ export default function HomePage() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/get-help"
                   className="text-gray-600 hover:text-orange-500 transition"
                 >
                   Get Help
@@ -46,7 +54,7 @@ export default function HomePage() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/stories"
                   className="text-gray-600 hover:text-orange-500 transition"
                 >
                   Stories
@@ -54,7 +62,7 @@ export default function HomePage() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/donate"
                   className="text-gray-600 hover:text-orange-500 transition"
                 >
                   Donate

@@ -1,42 +1,38 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from '../users/entities/user.entity';
 import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { StudentsService } from '../students/students.service';
 
 @Injectable()
 export class AuthService {
+  private mockUsers = [];
+
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
     private jwtService: JwtService,
+    private studentsService: StudentsService,
   ) {}
 
   async signup(signupDto: SignUpDto) {
-    // Check if user already exists
-    const existingUser = await this.usersRepository.findOne({
-      where: { email: signupDto.email },
-    });
-
+    const existingUser = this.mockUsers.find(u => u.email === signupDto.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(signupDto.password, 10);
-
-    // Create user
-    const user = this.usersRepository.create({
+    const user = {
+      id: Date.now().toString(),
       ...signupDto,
       password: hashedPassword,
-    });
+    };
+    this.mockUsers.push(user);
 
-    await this.usersRepository.save(user);
+    // Add student to students service
+    if (user.role === 'student') {
+      this.studentsService.addStudent(user);
+    }
 
-    // Generate JWT token
     const payload = { sub: user.id, email: user.email, role: user.role };
     const access_token = this.jwtService.sign(payload);
 
@@ -53,23 +49,16 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    // Find user
-    const user = await this.usersRepository.findOne({
-      where: { email: loginDto.email },
-    });
-
+    const user = this.mockUsers.find(u => u.email === loginDto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Check password
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
-
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate JWT token
     const payload = { sub: user.id, email: user.email, role: user.role };
     const access_token = this.jwtService.sign(payload);
 

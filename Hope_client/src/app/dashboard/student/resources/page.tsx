@@ -15,7 +15,8 @@ export default function StudentResourcesPage() {
       title: "Study Tips Guide",
       description: "Effective study techniques and time management strategies",
       type: "PDF",
-      icon: <FileText className="w-6 h-6" />
+      icon: <FileText className="w-6 h-6" />,
+      url: "https://www.youtube.com/results?search_query=study+tips+guide"
     },
     {
       id: "2",
@@ -23,7 +24,8 @@ export default function StudentResourcesPage() {
       title: "Relaxation Exercises",
       description: "Guided meditation and breathing exercises for stress relief",
       type: "Video",
-      icon: <Video className="w-6 h-6" />
+      icon: <Video className="w-6 h-6" />,
+      url: "https://www.youtube.com/results?search_query=guided+meditation+relaxation"
     },
     {
       id: "3",
@@ -31,7 +33,8 @@ export default function StudentResourcesPage() {
       title: "Career Planning Workbook",
       description: "Interactive workbook to explore career interests and goals",
       type: "PDF",
-      icon: <BookOpen className="w-6 h-6" />
+      icon: <BookOpen className="w-6 h-6" />,
+      url: "https://www.youtube.com/results?search_query=career+planning+guide"
     },
     {
       id: "4",
@@ -39,7 +42,8 @@ export default function StudentResourcesPage() {
       title: "Focus Music Playlist",
       description: "Curated playlist to enhance concentration while studying",
       type: "Audio",
-      icon: <Headphones className="w-6 h-6" />
+      icon: <Headphones className="w-6 h-6" />,
+      url: "https://www.youtube.com/results?search_query=study+focus+music"
     },
     {
       id: "5",
@@ -47,7 +51,8 @@ export default function StudentResourcesPage() {
       title: "College Application Guide",
       description: "Step-by-step guide for the college application process",
       type: "PDF",
-      icon: <FileText className="w-6 h-6" />
+      icon: <FileText className="w-6 h-6" />,
+      url: "https://www.youtube.com/results?search_query=college+application+guide"
     },
     {
       id: "6",
@@ -55,7 +60,8 @@ export default function StudentResourcesPage() {
       title: "Mental Health Awareness",
       description: "Understanding mental health and when to seek support",
       type: "Video",
-      icon: <Video className="w-6 h-6" />
+      icon: <Video className="w-6 h-6" />,
+      url: "https://www.youtube.com/results?search_query=mental+health+awareness"
     }
   ];
 
@@ -131,10 +137,15 @@ export default function StudentResourcesPage() {
                 <p className="text-gray-600 mb-4">{resource.description}</p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">{resource.type}</span>
-                  <button className="flex items-center gap-2 text-gray-700 font-medium hover:text-orange-500 transition">
+                  <a 
+                    href={resource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-gray-700 font-medium hover:text-orange-500 transition"
+                  >
                     <Download className="w-4 h-4" />
                     Access
-                  </button>
+                  </a>
                 </div>
               </div>
             ))}

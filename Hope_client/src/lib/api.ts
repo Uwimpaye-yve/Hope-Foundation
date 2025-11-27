@@ -20,4 +20,54 @@ export const api = {
     });
     return response.json();
   },
+
+  programs: {
+    async getAll() {
+      const response = await fetch(`${API_URL}/programs`);
+      return response.json();
+    },
+    async getOne(id: string) {
+      const response = await fetch(`${API_URL}/programs/${id}`);
+      return response.json();
+    },
+    async create(data: any) {
+      const response = await fetch(`${API_URL}/programs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      return response.json();
+    },
+    async delete(id: string) {
+      const response = await fetch(`${API_URL}/programs/${id}`, {
+        method: 'DELETE',
+      });
+      return response.json();
+    },
+    async getStudents(id: string) {
+      return [];
+    },
+  },
+
+  students: {
+    async getAll() {
+      const response = await fetch(`${API_URL}/students`);
+      return response.json();
+    },
+  },
+
+  supportRequests: {
+    async getAll() {
+      const response = await fetch(`${API_URL}/support-requests`);
+      return response.json();
+    },
+    async updateStatus(id: string, status: string) {
+      const response = await fetch(`${API_URL}/support-requests/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      return response.json();
+    },
+  },
 };

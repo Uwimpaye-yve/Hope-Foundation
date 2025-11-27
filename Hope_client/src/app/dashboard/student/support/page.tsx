@@ -1,10 +1,60 @@
 // File: app/dashboard/student/support/page.tsx
 "use client";
 
+import { useState } from "react";
 import { MessageCircle, Phone, Mail, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
 export default function StudentSupportPage() {
+  const [category, setCategory] = useState("");
+  const [priority, setPriority] = useState("");
+  const [subject, setSubject] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!category || !priority || !subject || !description) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/support-requests`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category,
+          priority,
+          subject,
+          description,
+          studentId: '1',
+          status: 'Pending',
+        }),
+      });
+
+      if (response.ok) {
+        setSuccess("Support request submitted successfully! We'll get back to you soon.");
+        setCategory("");
+        setPriority("");
+        setSubject("");
+        setDescription("");
+      } else {
+        setError("Failed to submit request. Please try again.");
+      }
+    } catch (err) {
+      setError("Failed to submit request. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -55,29 +105,49 @@ export default function StudentSupportPage() {
               <h2 className="text-3xl font-bold text-gray-800">Submit a Support Request</h2>
             </div>
 
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Subject */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Subject</label>
+                <input
+                  type="text"
+                  value={subject}
+                  onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Brief description of your issue"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                />
+              </div>
+
               {/* Type of Support */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">Type of Support</label>
-                <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50">
-                  <option>Select type</option>
-                  <option>Academic Help</option>
-                  <option>Mental Health</option>
-                  <option>Program Question</option>
-                  <option>Technical Issue</option>
-                  <option>Other</option>
+                <select 
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                >
+                  <option value="">Select type</option>
+                  <option value="Academic Help">Academic Help</option>
+                  <option value="Mental Health">Mental Health</option>
+                  <option value="Program Question">Program Question</option>
+                  <option value="Technical Issue">Technical Issue</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
 
               {/* Priority Level */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">Priority Level</label>
-                <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50">
-                  <option>Select priority</option>
-                  <option>Low - Can wait a few days</option>
-                  <option>Medium - Need help this week</option>
-                  <option>High - Need help today</option>
-                  <option>Urgent - Emergency</option>
+                <select 
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
+                >
+                  <option value="">Select priority</option>
+                  <option value="Low">Low - Can wait a few days</option>
+                  <option value="Medium">Medium - Need help this week</option>
+                  <option value="High">High - Need help today</option>
+                  <option value="Urgent">Urgent - Emergency</option>
                 </select>
               </div>
 
@@ -85,22 +155,45 @@ export default function StudentSupportPage() {
               <div>
                 <label className="block text-gray-700 font-medium mb-2">Message</label>
                 <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   rows={6}
                   placeholder="Tell us how we can help you..."
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-gray-50"
                 ></textarea>
               </div>
 
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
+                  {success}
+                </div>
+              )}
+
               {/* Buttons */}
               <div className="flex gap-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-orange-500 text-white py-4 rounded-full font-semibold hover:bg-orange-600 transition"
+                  disabled={loading}
+                  className="flex-1 bg-orange-500 text-white py-4 rounded-full font-semibold hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed transition"
                 >
-                  Submit Request
+                  {loading ? "Submitting..." : "Submit Request"}
                 </button>
                 <button
                   type="button"
+                  onClick={() => {
+                    setCategory("");
+                    setPriority("");
+                    setSubject("");
+                    setDescription("");
+                    setError("");
+                    setSuccess("");
+                  }}
                   className="px-8 py-4 bg-white text-gray-700 rounded-full font-semibold border border-gray-300 hover:bg-gray-50 transition"
                 >
                   Cancel

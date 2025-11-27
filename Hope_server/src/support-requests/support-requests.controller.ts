@@ -25,4 +25,19 @@ export class SupportRequestsController {
   updateStatus(@Param('id') id: string, @Body() body: { status: string }) {
     return this.supportRequestsService.updateStatus(id, body.status);
   }
+
+  @Post(':id/respond')
+  respond(@Param('id') id: string, @Body() body: { response: string }) {
+    return this.supportRequestsService.respond(id, body.response);
+  }
+
+  @Post(':id/email')
+  sendEmail(@Param('id') id: string, @Body() body: { subject: string; message: string }) {
+    return this.supportRequestsService.sendEmail(id, body.subject, body.message);
+  }
+
+  @Get('counselor/:counselorId')
+  getCounselorRequests(@Param('counselorId') counselorId: string) {
+    return this.supportRequestsService.getCounselorRequests(counselorId);
+  }
 }

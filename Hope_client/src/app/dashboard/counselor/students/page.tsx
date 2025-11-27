@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import CounselorLayout from "@/components/counselor/CounselorLayout";
+import Navbar from "@/components/Navbar";
 import { api } from "@/lib/api";
-import { Mail, Phone, Calendar, TrendingUp, Plus } from "lucide-react";
+import { Mail, Phone, Calendar, TrendingUp, MessageCircle } from "lucide-react";
 
 interface Student {
   id: string;
@@ -23,7 +23,9 @@ export default function CounselorStudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     loadStudents();
@@ -43,19 +45,21 @@ export default function CounselorStudentsPage() {
 
   if (loading) {
     return (
-      <CounselorLayout>
+      <div>
+        <Navbar />
         <div className="p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading students...</p>
           </div>
         </div>
-      </CounselorLayout>
+      </div>
     );
   }
 
   return (
-    <CounselorLayout>
+    <div>
+      <Navbar />
       <div className="p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">My Students</h1>
@@ -116,7 +120,7 @@ export default function CounselorStudentsPage() {
 
               <div className="flex gap-2">
                 <button 
-                  onClick={() => router.push(`/dashboard/admin/students/${student.id}`)}
+                  onClick={() => router.push(`/dashboard/counselor/students/${student.id}`)}
                   className="flex-1 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition text-sm"
                 >
                   View Profile
@@ -124,11 +128,13 @@ export default function CounselorStudentsPage() {
                 <button 
                   onClick={() => {
                     setSelectedStudent(student);
-                    setShowScheduleModal(true);
+                    setShowMessageModal(true);
+                    setMessage("");
                   }}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm"
+                  className="p-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                  title="Send Message"
                 >
-                  Schedule Session
+                  <MessageCircle className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -198,7 +204,75 @@ export default function CounselorStudentsPage() {
             </div>
           </div>
         )}
+
+        {/* Message Modal */}
+        {showMessageModal && selectedStudent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowMessageModal(false)}>
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-800">
+                  Message {selectedStudent.firstName} {selectedStudent.lastName}
+                </h3>
+                <button onClick={() => setShowMessageModal(false)} className="text-gray-500 hover:text-gray-700">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">To: {selectedStudent.email}</p>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={6}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  placeholder="Type your message here..."
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowMessageModal(false)}
+                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    if (message.trim()) {
+                      try {
+                        await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/messages`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            studentId: selectedStudent.id,
+                            studentEmail: selectedStudent.email,
+                            message: message,
+                            sentAt: new Date().toISOString(),
+                          }),
+                        });
+                        setShowMessageModal(false);
+                        setMessage("");
+                      } catch (error) {
+                        console.error('Failed to send message:', error);
+                      }
+                    }
+                  }}
+                  disabled={!message.trim()}
+                  className="flex-1 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed transition"
+                >
+                  Send Message
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </CounselorLayout>
+    </div>
   );
 }

@@ -1,10 +1,65 @@
 "use client";
 import { useState } from "react";
-import { BookOpen, Brain, Users, Sparkles, Star, Heart } from "lucide-react";
+import { BookOpen, Brain, Users, Sparkles, Star, Heart, Send, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Footer from "@/components/Footer";
 export default function ProgramsPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [age, setAge] = useState("");
+  const [programType, setProgramType] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleApply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!fullName || !email || !phone || !age || !programType) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:3000/api/programs/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName,
+          email,
+          phone,
+          age: parseInt(age),
+          programType,
+          message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
+        setFullName("");
+        setEmail("");
+        setPhone("");
+        setAge("");
+        setProgramType("");
+        setMessage("");
+        setTimeout(() => setSuccess(false), 5000);
+      } else {
+        setError(data.message || "Application failed. Please try again.");
+      }
+    } catch (err) {
+      setError("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h screen bg-white">
@@ -380,6 +435,160 @@ export default function ProgramsPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Application Form Section */}
+      <section className="py-20 px-6 lg:px-8 bg-gradient-to-br from-orange-50 to-purple-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="flex justify-center mb-6">
+              <div className="bg-orange-400 text-white w-16 h-16 rounded-2xl flex items-center justify-center">
+                <Send className="w-8 h-8" />
+              </div>
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+              Apply for a Program
+            </h2>
+            <p className="text-lg text-gray-600">
+              Take the first step towards a brighter future. Fill out the form below and we'll get in touch with you.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-8 shadow-lg">
+            <form onSubmit={handleApply} className="space-y-6">
+              {/* Full Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter your full name"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  required
+                />
+              </div>
+
+              {/* Email & Phone */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+1 (555) 000-0000"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Age & Program Type */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Age *
+                  </label>
+                  <input
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="Enter age"
+                    min="1"
+                    max="100"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Program Type *
+                  </label>
+                  <select
+                    value={programType}
+                    onChange={(e) => setProgramType(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
+                  >
+                    <option value="">Select a program</option>
+                    <option value="education">Education Support</option>
+                    <option value="mental-health">Mental Health Counseling</option>
+                    <option value="community">Community Programs</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Message */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tell us about yourself (Optional)
+                </label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Share any additional information that might help us serve you better..."
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
+                  {error}
+                </div>
+              )}
+
+              {/* Success Message */}
+              {success && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-600">
+                  ✅ Application submitted successfully! We'll contact you within 2-3 business days.
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-orange-400 text-white py-4 rounded-full font-semibold hover:bg-orange-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    Submit Application
+                  </>
+                )}
+              </button>
+
+              <p className="text-sm text-gray-500 text-center">
+                By submitting this form, you agree to be contacted by Hope Foundation regarding your application.
+              </p>
+            </form>
           </div>
         </div>
       </section>

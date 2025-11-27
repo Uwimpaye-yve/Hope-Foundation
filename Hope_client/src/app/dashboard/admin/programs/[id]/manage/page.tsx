@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import AdminLayout from "@/components/admin/AdminLayout";
+import Navbar from "@/components/Navbar";
 import { api } from "@/lib/api";
 import { Plus, X } from "lucide-react";
 
@@ -43,7 +43,14 @@ export default function ManageProgramPage() {
         api.programs.getStudents(params.id as string)
       ]);
       
-      setProgram(programData);
+      // Map backend data to expected format
+      setProgram({
+        id: programData.id,
+        name: programData.title || programData.name,
+        description: programData.description,
+        capacity: programData.maxStudents || 50,
+        enrolled: programData.studentsEnrolled || 0,
+      });
       setAllStudents(studentsData);
       setEnrolledStudents(enrolledData);
     } catch (error) {
@@ -98,31 +105,34 @@ export default function ManageProgramPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <div>
+        <Navbar />
         <div className="p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading program...</p>
           </div>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   if (!program) {
     return (
-      <AdminLayout>
+      <div>
+        <Navbar />
         <div className="p-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-red-800">Program not found</p>
           </div>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   return (
-    <AdminLayout>
+    <div>
+      <Navbar />
       <div className="p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Manage: {program.name}</h1>
@@ -204,6 +214,6 @@ export default function ManageProgramPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

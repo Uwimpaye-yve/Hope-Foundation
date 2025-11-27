@@ -98,11 +98,11 @@ export const authService = {
   },
 
   // ---------------- DASHBOARD ----------------
-  async getAdminDashboard() {
+  async getAdminStats() {
     const token = this.getToken();
     if (!token) throw new Error("Not authenticated");
 
-    const response = await fetch(`${API_URL}/dashboard/stats`, {
+    const response = await fetch(`${API_URL}/students/stats`, {
       method: "GET",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     });
@@ -110,16 +110,11 @@ export const authService = {
     return await handleResponse(response);
   },
 
-  async getStudentsList(search?: string, limit = 10, offset = 0) {
+  async getAllStudents() {
     const token = this.getToken();
     if (!token) throw new Error("Not authenticated");
 
-    const query = new URLSearchParams();
-    if (search) query.append("search", search);
-    query.append("limit", limit.toString());
-    query.append("offset", offset.toString());
-
-    const response = await fetch(`${API_URL}/dashboard/students?${query.toString()}`, {
+    const response = await fetch(`${API_URL}/students`, {
       method: "GET",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     });
@@ -148,6 +143,182 @@ export const authService = {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     });
 
+    return await handleResponse(response);
+  },
+};
+
+// ---------------- SESSIONS ----------------
+export const sessionService = {
+  async getCounselorSessions() {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/sessions/counselor`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    });
+    return await handleResponse(response);
+  },
+
+  async createSession(data: any) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/sessions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    });
+    return await handleResponse(response);
+  },
+
+  async updateSession(id: string, data: any) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/sessions/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(data),
+    });
+    return await handleResponse(response);
+  },
+
+  async addNote(id: string, notes: string) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/sessions/${id}/notes`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ notes }),
+    });
+    return await handleResponse(response);
+  },
+
+  async rescheduleSession(id: string, scheduledTime: Date) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/sessions/${id}/reschedule`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ scheduledTime }),
+    });
+    return await handleResponse(response);
+  },
+
+  async updateStatus(id: string, status: string) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/sessions/${id}/status`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    });
+    return await handleResponse(response);
+  },
+
+  async getSession(id: string) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/sessions/${id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    });
+    return await handleResponse(response);
+  },
+};
+
+// ---------------- STUDENTS ----------------
+export const studentService = {
+  async getStudentProfile(id: string) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/students/${id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    });
+    return await handleResponse(response);
+  },
+};
+
+// ---------------- MESSAGES ----------------
+export const messageService = {
+  async sendMessage(data: { receiverId: string; message: string }) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const user = authService.getUser();
+    const response = await fetch(`${API_URL}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ ...data, senderId: user.id }),
+    });
+    return await handleResponse(response);
+  },
+
+  async getConversation(userId: string, otherUserId: string) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/messages/conversation/${userId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ userId, otherUserId }),
+    });
+    return await handleResponse(response);
+  },
+};
+
+// ---------------- SUPPORT REQUESTS ----------------
+export const supportRequestService = {
+  async getCounselorRequests(counselorId: string) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/support-requests/counselor/${counselorId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    });
+    return await handleResponse(response);
+  },
+
+  async getAllRequests() {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/support-requests`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    });
+    return await handleResponse(response);
+  },
+
+  async respond(id: string, responseText: string) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/support-requests/${id}/respond`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ response: responseText }),
+    });
+    return await handleResponse(response);
+  },
+
+  async sendEmail(id: string, subject: string, message: string) {
+    const token = authService.getToken();
+    if (!token) throw new Error("Not authenticated");
+
+    const response = await fetch(`${API_URL}/support-requests/${id}/email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ subject, message }),
+    });
     return await handleResponse(response);
   },
 };

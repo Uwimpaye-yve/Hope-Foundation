@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import AdminLayout from "@/components/admin/AdminLayout";
+import Navbar from "@/components/Navbar";
 import { api } from "@/lib/api";
 
 interface Program {
@@ -35,7 +35,24 @@ export default function ProgramDetailPage() {
   const loadProgram = async (id: string) => {
     try {
       const data = await api.programs.getOne(id);
-      setProgram(data);
+      if (!data) {
+        setError("Program not found");
+        return;
+      }
+      // Map backend data to expected format
+      setProgram({
+        id: data.id,
+        name: data.title || data.name,
+        description: data.description,
+        duration: '12 weeks',
+        schedule: data.schedule || 'TBD',
+        capacity: data.maxStudents || 50,
+        enrolled: data.studentsEnrolled || 0,
+        status: data.status || 'Active',
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        materials: [],
+      });
     } catch (err: any) {
       setError(err.message || "Failed to load program");
     } finally {
@@ -56,20 +73,22 @@ export default function ProgramDetailPage() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <div>
+        <Navbar />
         <div className="p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading program...</p>
           </div>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   if (error || !program) {
     return (
-      <AdminLayout>
+      <div>
+        <Navbar />
         <div className="p-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Program Not Found</h1>
@@ -79,12 +98,13 @@ export default function ProgramDetailPage() {
             <p className="text-red-800">{error || "Program not found"}</p>
           </div>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   return (
-    <AdminLayout>
+    <div>
+      <Navbar />
       <div className="p-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">{program.name}</h1>
@@ -181,6 +201,6 @@ export default function ProgramDetailPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </div>
   );
 }

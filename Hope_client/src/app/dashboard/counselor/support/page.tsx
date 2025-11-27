@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import CounselorLayout from "@/components/counselor/CounselorLayout";
+import Navbar from "@/components/Navbar";
 import { api } from "@/lib/api";
 import { MessageCircle, Clock, User, AlertTriangle } from "lucide-react";
 
@@ -20,6 +20,10 @@ export default function CounselorSupportPage() {
   const [requests, setRequests] = useState<SupportRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [selectedRequest, setSelectedRequest] = useState<SupportRequest | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showRespondModal, setShowRespondModal] = useState(false);
+  const [response, setResponse] = useState("");
 
   useEffect(() => {
     loadRequests();
@@ -44,6 +48,33 @@ export default function CounselorSupportPage() {
       ));
     } catch (error) {
       console.error("Failed to update status:", error);
+    }
+  };
+
+  const handleViewRequest = (request: SupportRequest) => {
+    setSelectedRequest(request);
+    setShowViewModal(true);
+  };
+
+  const handleRespondRequest = (request: SupportRequest) => {
+    setSelectedRequest(request);
+    setShowRespondModal(true);
+    setResponse("");
+  };
+
+  const submitResponse = async () => {
+    if (!selectedRequest || !response.trim()) return;
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/support-requests/${selectedRequest.id}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ response }),
+      });
+      await loadRequests();
+      setShowRespondModal(false);
+      setResponse("");
+    } catch (error) {
+      console.error("Failed to respond:", error);
     }
   };
 
@@ -75,19 +106,21 @@ export default function CounselorSupportPage() {
 
   if (loading) {
     return (
-      <CounselorLayout>
+      <div>
+        <Navbar />
         <div className="p-8 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading support requests...</p>
           </div>
         </div>
-      </CounselorLayout>
+      </div>
     );
   }
 
   return (
-    <CounselorLayout>
+    <div>
+      <Navbar />
       <div className="p-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -158,21 +191,19 @@ export default function CounselorSupportPage() {
                     {request.status}
                   </span>
                   
-                  {request.status === "Pending" && (
+                  <button
+                    onClick={() => handleViewRequest(request)}
+                    className="px-3 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 transition"
+                  >
+                    View Details
+                  </button>
+                  
+                  {request.status !== "Resolved" && (
                     <button
-                      onClick={() => updateStatus(request.id, "In Progress")}
+                      onClick={() => handleRespondRequest(request)}
                       className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 transition"
                     >
-                      Take Action
-                    </button>
-                  )}
-                  
-                  {request.status === "In Progress" && (
-                    <button
-                      onClick={() => updateStatus(request.id, "Resolved")}
-                      className="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition"
-                    >
-                      Mark Resolved
+                      Respond
                     </button>
                   )}
                 </div>
@@ -197,7 +228,110 @@ export default function CounselorSupportPage() {
             </div>
           )}
         </div>
+
+        {/* View Modal */}
+        {showViewModal && selectedRequest && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowViewModal(false)}>
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-800">Request Details</h2>
+                <button onClick={() => setShowViewModal(false)} className="text-gray-500 hover:text-gray-700">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Subject</label>
+                  <p className="text-gray-800 font-semibold">{selectedRequest.subject}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Category</label>
+                  <p className="text-gray-800">{selectedRequest.category}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Priority</label>
+                  <p className="text-gray-800">{selectedRequest.priority}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Description</label>
+                  <p className="text-gray-800">{selectedRequest.description}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <p className="text-gray-800">{selectedRequest.status}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Submitted</label>
+                  <p className="text-gray-800">{new Date(selectedRequest.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setShowViewModal(false)}
+                className="mt-6 w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Respond Modal */}
+        {showRespondModal && selectedRequest && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowRespondModal(false)}>
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-800">Respond to Request</h2>
+                <button onClick={() => setShowRespondModal(false)} className="text-gray-500 hover:text-gray-700">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-2">Request: <span className="font-semibold text-gray-800">{selectedRequest.subject}</span></p>
+                <p className="text-gray-700">{selectedRequest.description}</p>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Your Response</label>
+                <textarea
+                  value={response}
+                  onChange={(e) => setResponse(e.target.value)}
+                  rows={6}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none"
+                  placeholder="Type your response here..."
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowRespondModal(false)}
+                  className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitResponse}
+                  disabled={!response.trim()}
+                  className="flex-1 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 disabled:bg-orange-300 disabled:cursor-not-allowed transition"
+                >
+                  Send Response
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </CounselorLayout>
+    </div>
   );
 }

@@ -1,10 +1,51 @@
 "use client";
 
+import { useState } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import StoryCard from "@/components/StoryCard";
+import { X, Send, Loader2 } from "lucide-react";
 
 export default function StoriesPage() {
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [author, setAuthor] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:3000/api/stories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, author }),
+      });
+
+      if (response.ok) {
+        setSuccess(true);
+        setTitle("");
+        setContent("");
+        setAuthor("");
+        setTimeout(() => {
+          setSuccess(false);
+          setShowModal(false);
+        }, 3000);
+      } else {
+        setError("Failed to submit story. Please try again.");
+      }
+    } catch (err) {
+      setError("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const stories = [
     {
       quote:
@@ -104,12 +145,12 @@ export default function StoriesPage() {
             >
               Donate Today
             </a>
-            <a
-              href="/contact"
+            <button
+              onClick={() => setShowModal(true)}
               className="bg-transparent border-2 border-white text-white px-10 py-4 rounded-full font-semibold hover:bg-white/10 transition-all text-lg"
             >
               Share Your Story
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -123,6 +164,124 @@ export default function StoriesPage() {
         </div>
       </div>
       <Footer />
+
+      {/* Share Story Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-8 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="text-center mb-8">
+              <div className="flex justify-center mb-4">
+                <div className="bg-pink-100 text-pink-500 w-16 h-16 rounded-2xl flex items-center justify-center">
+                  <Send className="w-8 h-8" />
+                </div>
+              </div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                Share Your Story
+              </h2>
+              <p className="text-gray-600">
+                Your story can inspire others and give them hope
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Story Title *
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Give your story a title"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  required
+                />
+              </div>
+
+              {/* Author Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Your Name *
+                </label>
+                <input
+                  type="text"
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
+                  placeholder="How would you like to be identified?"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  required
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  You can use your first name, initials, or remain anonymous
+                </p>
+              </div>
+
+              {/* Story Content */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Your Story *
+                </label>
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Share your journey, challenges you've overcome, or how Hope Foundation has impacted your life..."
+                  rows={8}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  required
+                />
+              </div>
+
+              {/* Privacy Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <p className="text-sm text-blue-800">
+                  🔒 Your story will be reviewed before publishing. We may edit for clarity and privacy protection.
+                </p>
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
+                  {error}
+                </div>
+              )}
+
+              {/* Success Message */}
+              {success && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-600">
+                  ✅ Thank you for sharing your story! It will be reviewed and published soon.
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-orange-400 to-pink-400 text-white py-4 rounded-full font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    Share My Story
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

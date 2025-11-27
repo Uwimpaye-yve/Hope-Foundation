@@ -1,40 +1,63 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { CreateSupportRequestDto } from './dto/create-support-request.dto';
-import { SupportRequest } from './entities/support-request.entity';
 
 @Injectable()
 export class SupportRequestsService {
-  constructor(
-    @InjectRepository(SupportRequest)
-    private supportRequestsRepository: Repository<SupportRequest>,
-  ) {}
+  private requests = [];
 
-  async create(createSupportRequestDto: CreateSupportRequestDto): Promise<SupportRequest> {
-    const supportRequest = new SupportRequest();
-    Object.assign(supportRequest, createSupportRequestDto);
-    supportRequest.status = createSupportRequestDto.status || 'Pending';
-    
-    return await this.supportRequestsRepository.save(supportRequest);
+  async create(createSupportRequestDto: CreateSupportRequestDto): Promise<any> {
+    const request = {
+      id: Date.now().toString(),
+      ...createSupportRequestDto,
+      status: createSupportRequestDto.status || 'Pending',
+      createdAt: new Date().toISOString(),
+      response: null,
+    };
+    this.requests.push(request);
+    return request;
   }
 
-  async findAll(): Promise<SupportRequest[]> {
-    return await this.supportRequestsRepository.find({
-      relations: ['student'],
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(): Promise<any[]> {
+    return this.requests;
   }
 
-  async findOne(id: string): Promise<SupportRequest | null> {
-    return await this.supportRequestsRepository.findOne({
-      where: { id },
-      relations: ['student'],
-    });
+  async findOne(id: string): Promise<any | null> {
+    return this.requests.find(r => r.id === id) || null;
   }
 
-  async updateStatus(id: string, status: string): Promise<SupportRequest | null> {
-    await this.supportRequestsRepository.update(id, { status });
-    return this.findOne(id);
+  async updateStatus(id: string, status: string): Promise<any | null> {
+    const request = this.requests.find(r => r.id === id);
+    if (request) {
+      request.status = status;
+      return request;
+    }
+    return null;
+  }
+
+  async respond(id: string, response: string): Promise<any | null> {
+    const request = this.requests.find(r => r.id === id);
+    if (request) {
+      request.response = response;
+      request.status = 'Resolved';
+      request.respondedAt = new Date().toISOString();
+      return request;
+    }
+    return null;
+  }
+
+  async sendEmail(id: string, subject: string, message: string): Promise<any | null> {
+    const request = this.requests.find(r => r.id === id);
+    if (request) {
+      request.emailSent = true;
+      request.emailSubject = subject;
+      request.emailMessage = message;
+      request.emailSentAt = new Date().toISOString();
+      return { success: true, message: 'Email sent successfully', request };
+    }
+    return null;
+  }
+
+  async getCounselorRequests(counselorId: string): Promise<any[]> {
+    return this.requests.filter(r => r.counselorId === counselorId || r.status === 'Pending');
   }
 }

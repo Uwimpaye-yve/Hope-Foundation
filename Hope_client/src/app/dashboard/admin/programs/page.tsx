@@ -1,50 +1,29 @@
 // File: app/admin/programs/page.tsx
 "use client";
 
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 
 export default function AdminProgramsPage() {
-  const programs = [
-    {
-      id: "1",
-      title: "Academic Tutoring",
-      description:
-        "One-on-one tutoring for students struggling with core subjects",
-      studentsEnrolled: 45,
-      sessionsCompleted: 120,
-      schedule: "Mon, Wed, Fri",
-      status: "Active",
-    },
-    {
-      id: "2",
-      title: "Mental Health Support",
-      description: "Professional counseling and emotional support services",
-      studentsEnrolled: 32,
-      sessionsCompleted: 85,
-      schedule: "Tue, Thu",
-      status: "Active",
-    },
-    {
-      id: "3",
-      title: "Career Guidance",
-      description:
-        "Help students explore career paths and develop professional skills",
-      studentsEnrolled: 28,
-      sessionsCompleted: 64,
-      schedule: "Wednesday",
-      status: "Active",
-    },
-    {
-      id: "4",
-      title: "Community Service",
-      description: "Volunteer opportunities to build character and give back",
-      studentsEnrolled: 52,
-      sessionsCompleted: 45,
-      schedule: "Weekends",
-      status: "Active",
-    },
-  ];
+  const [programs, setPrograms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPrograms();
+  }, []);
+
+  const fetchPrograms = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/programs`);
+      const data = await response.json();
+      setPrograms(data);
+    } catch (error) {
+      console.error('Failed to fetch programs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -99,9 +78,13 @@ export default function AdminProgramsPage() {
 
       {/* Content */}
       <div className="p-8">
-        {/* Programs Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {programs.map((program) => (
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">Loading programs...</div>
+        ) : programs.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">No programs yet. Create your first program!</div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {programs.map((program) => (
             <div
               key={program.id}
               className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition"
@@ -195,21 +178,22 @@ export default function AdminProgramsPage() {
               {/* Action Buttons */}
               <div className="flex gap-3">
                 <Link
-                  href={`/admin/programs/${program.id}`}
+                  href={`/dashboard/admin/programs/${program.id}`}
                   className="flex-1 text-center px-6 py-3 bg-gray-50 text-gray-700 rounded-full font-semibold hover:bg-gray-100 transition"
                 >
                   View Details
                 </Link>
                 <Link
-                  href={`/admin/programs/${program.id}/manage`}
+                  href={`/dashboard/admin/programs/${program.id}/manage`}
                   className="flex-1 text-center px-6 py-3 bg-orange-500 text-white rounded-full font-semibold hover:bg-orange-600 transition"
                 >
                   Manage
                 </Link>
               </div>
             </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

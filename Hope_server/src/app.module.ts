@@ -9,17 +9,27 @@ import { ProgramsModule } from './programs/programs.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { SupportRequestsModule } from './support-requests/support-requests.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { DonationsModule } from './donations/donations.module';
+import { StoriesModule } from './stories/stories.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: getDatabaseConfig,
-      inject: [ConfigService],
-    }),
+    ...(process.env.DISABLE_DATABASE !== 'true'
+      ? [
+          TypeOrmModule.forRootAsync({
+            imports: [ConfigModule],
+            useFactory: (configService: ConfigService) => ({
+              ...getDatabaseConfig(configService),
+              autoLoadEntities: true,
+            }),
+            inject: [ConfigService],
+          }),
+        ]
+      : []),
     AuthModule,
     UsersModule,
     StudentsModule,
@@ -27,6 +37,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
     SessionsModule,
     SupportRequestsModule,
     DashboardModule,
+    DonationsModule,
+    StoriesModule,
+    MessagesModule,
   ],
 })
 export class AppModule {}

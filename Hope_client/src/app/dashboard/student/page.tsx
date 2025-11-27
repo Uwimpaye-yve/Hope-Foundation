@@ -1,6 +1,7 @@
 // File: app/dashboard/student/page.tsx
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   BookOpen,
   Users,
@@ -9,6 +10,9 @@ import {
   TrendingUp,
   Lightbulb,
   Brain,
+  X,
+  Send,
+  Loader2,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 
@@ -32,8 +36,70 @@ interface Achievement {
 
 export default function StudentDashboard() {
   const studentName = "Student";
+  const [showModal, setShowModal] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [stats, setStats] = useState({ programs: 0, sessions: 0, hours: 0, achievements: 0 });
 
-  const programs: Program[] = [
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/dashboard/student/stats");
+      const data = await response.json();
+      if (data.programs) setPrograms(data.programs);
+      if (data.stats) setStats(data.stats);
+    } catch (err) {
+      console.error("Failed to fetch dashboard data");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) {
+      setError("Please enter a message");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:3000/api/support-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priority: "Medium",
+          category: "Counseling Request",
+          subject: "Student needs counselor support",
+          description: message,
+          status: "Pending",
+        }),
+      });
+
+      if (response.ok) {
+        setSuccess(true);
+        setMessage("");
+        setTimeout(() => {
+          setSuccess(false);
+          setShowModal(false);
+        }, 2000);
+      } else {
+        setError("Failed to send request. Please try again.");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const defaultPrograms: Program[] = [
     {
       id: "1",
       name: "Math Tutoring",
@@ -62,6 +128,8 @@ export default function StudentDashboard() {
       bgColor: "bg-yellow-50",
     },
   ];
+
+  const displayPrograms = programs.length > 0 ? programs : defaultPrograms;
 
   const achievements: Achievement[] = [
     {
@@ -162,7 +230,7 @@ export default function StudentDashboard() {
                 </span>
                 <BookOpen className="w-5 h-5 text-orange-500" />
               </div>
-              <div className="text-4xl font-bold text-gray-800">3</div>
+              <div className="text-4xl font-bold text-gray-800">{stats.programs || displayPrograms.length}</div>
             </div>
 
             {/* Sessions Done */}
@@ -171,7 +239,7 @@ export default function StudentDashboard() {
                 <span className="text-gray-600 font-medium">Sessions Done</span>
                 <Award className="w-5 h-5 text-pink-500" />
               </div>
-              <div className="text-4xl font-bold text-gray-800">12</div>
+              <div className="text-4xl font-bold text-gray-800">{stats.sessions || 12}</div>
             </div>
 
             {/* This Week */}
@@ -180,7 +248,7 @@ export default function StudentDashboard() {
                 <span className="text-gray-600 font-medium">This Week</span>
                 <TrendingUp className="w-5 h-5 text-orange-500" />
               </div>
-              <div className="text-4xl font-bold text-gray-800">8h</div>
+              <div className="text-4xl font-bold text-gray-800">{stats.hours || 8}h</div>
             </div>
 
             {/* Achievements */}
@@ -189,7 +257,7 @@ export default function StudentDashboard() {
                 <span className="text-gray-600 font-medium">Achievements</span>
                 <Heart className="w-5 h-5 text-red-500" />
               </div>
-              <div className="text-4xl font-bold text-gray-800">5</div>
+              <div className="text-4xl font-bold text-gray-800">{stats.achievements || 5}</div>
             </div>
           </div>
 
@@ -198,7 +266,7 @@ export default function StudentDashboard() {
             <div className="lg:col-span-2 space-y-6">
               <h2 className="text-2xl font-bold text-gray-800">My Programs</h2>
 
-              {programs.map((program) => (
+              {displayPrograms.map((program) => (
                 <div
                   key={program.id}
                   className={`${program.bgColor} rounded-2xl p-6`}
@@ -242,7 +310,10 @@ export default function StudentDashboard() {
                 <p className="text-white/90 mb-4">
                   Our counselors are here to help you anytime.
                 </p>
-                <button className="w-full bg-pink-200 text-gray-800 py-3 rounded-full font-semibold hover:bg-pink-300 transition">
+                <button 
+                  onClick={() => setShowModal(true)}
+                  className="w-full bg-pink-200 text-gray-800 py-3 rounded-full font-semibold hover:bg-pink-300 transition"
+                >
                   Talk to a Counselor
                 </button>
               </div>
@@ -295,45 +366,143 @@ export default function StudentDashboard() {
               Helpful Resources
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition">
+              <a 
+                href="https://www.youtube.com/results?search_query=study+tips+for+students"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition cursor-pointer"
+              >
                 <h3 className="text-lg font-bold text-gray-800 mb-2">
                   Study Tips
                 </h3>
                 <p className="text-gray-600 text-sm">
                   Articles and videos to help you learn better
                 </p>
-              </div>
+              </a>
 
-              <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition">
+              <a 
+                href="https://www.youtube.com/results?search_query=guided+meditation+for+students"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition cursor-pointer"
+              >
                 <h3 className="text-lg font-bold text-gray-800 mb-2">
                   Relaxation Videos
                 </h3>
                 <p className="text-gray-600 text-sm">
                   Guided meditation and calming exercises
                 </p>
-              </div>
+              </a>
 
-              <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition">
+              <a 
+                href="/stories"
+                className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition cursor-pointer"
+              >
                 <h3 className="text-lg font-bold text-gray-800 mb-2">
                   Success Stories
                 </h3>
                 <p className="text-gray-600 text-sm">
                   Read inspiring stories from other students
                 </p>
-              </div>
+              </a>
 
-              <div className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition">
+              <a 
+                href="https://www.youtube.com/results?search_query=educational+games+for+students"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition cursor-pointer"
+              >
                 <h3 className="text-lg font-bold text-gray-800 mb-2">
                   Learning Games
                 </h3>
                 <p className="text-gray-600 text-sm">
                   Fun educational games and activities
                 </p>
-              </div>
+              </a>
             </div>
           </div>
         </main>
       </div>
+
+      {/* Support Request Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-8 relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="flex justify-center mb-4">
+                <div className="bg-pink-100 text-pink-500 w-16 h-16 rounded-2xl flex items-center justify-center">
+                  <Heart className="w-8 h-8" />
+                </div>
+              </div>
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                Talk to a Counselor
+              </h2>
+              <p className="text-gray-600">
+                Tell us what's on your mind. A counselor will reach out to you soon.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  How can we help you? *
+                </label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Share what you're going through... Your message is confidential."
+                  rows={6}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  required
+                />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <p className="text-sm text-blue-800">
+                  🔒 Your message is private and confidential. A counselor will contact you within 24 hours.
+                </p>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-600">
+                  ✅ Request sent! A counselor will contact you soon.
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-orange-400 to-pink-400 text-white py-4 rounded-full font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    Send Request
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

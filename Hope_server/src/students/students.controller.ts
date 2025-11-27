@@ -18,6 +18,12 @@ export class StudentsController {
     return this.studentsService.create(createStudentDto);
   }
 
+  @Get('stats')
+  @Roles(UserRole.ADMIN)
+  getStats() {
+    return this.studentsService.getStats();
+  }
+
   @Get()
   @Roles(UserRole.ADMIN, UserRole.COUNSELOR)
   findAll() {

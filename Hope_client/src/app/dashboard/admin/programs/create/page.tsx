@@ -27,11 +27,21 @@ export default function CreateProgramPage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Send data to API
-    alert("Program created successfully!");
-    router.push("/dashboardadmin/programs");
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'}/programs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        alert("Program created successfully!");
+        router.push("/dashboard/admin/programs");
+      }
+    } catch (error) {
+      alert("Failed to create program");
+    }
   };
 
   return (

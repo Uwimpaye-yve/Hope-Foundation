@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Heart, Phone, Mail, MessageCircle } from "lucide-react";
+import { Heart, Phone, Mail, MessageCircle, Video, X, PhoneCall } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -15,6 +15,8 @@ export default function GetHelpPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [callType, setCallType] = useState<'video' | 'audio' | null>(null);
 
   const API_URL =
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
@@ -143,7 +145,10 @@ export default function GetHelpPage() {
                 Live Chat
               </h2>
               <p className="text-gray-600 mb-4">Chat with a Counselor</p>
-              <button className="bg-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-600 transition">
+              <button 
+                onClick={() => setShowChatModal(true)}
+                className="bg-orange-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-orange-600 transition"
+              >
                 Start Chat
               </button>
             </div>
@@ -335,6 +340,141 @@ export default function GetHelpPage() {
       </section>
 
       <Footer />
+
+      {/* Video/Audio Call Modal */}
+      {showChatModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-8 relative">
+            <button
+              onClick={() => {
+                setShowChatModal(false);
+                setCallType(null);
+              }}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {!callType ? (
+              <>
+                <div className="text-center mb-8">
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-orange-100 text-orange-500 w-16 h-16 rounded-2xl flex items-center justify-center">
+                      <MessageCircle className="w-8 h-8" />
+                    </div>
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                    Connect with a Counselor
+                  </h2>
+                  <p className="text-gray-600">
+                    Choose how you'd like to connect with our support team
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Video Call */}
+                  <button
+                    onClick={() => setCallType('video')}
+                    className="bg-gradient-to-br from-orange-400 to-orange-500 text-white p-8 rounded-2xl hover:shadow-lg transition group"
+                  >
+                    <div className="flex justify-center mb-4">
+                      <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition">
+                        <Video className="w-8 h-8" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">Video Call</h3>
+                    <p className="text-white/90">
+                      Face-to-face conversation with a counselor
+                    </p>
+                  </button>
+
+                  {/* Audio Call */}
+                  <button
+                    onClick={() => setCallType('audio')}
+                    className="bg-gradient-to-br from-pink-400 to-pink-500 text-white p-8 rounded-2xl hover:shadow-lg transition group"
+                  >
+                    <div className="flex justify-center mb-4">
+                      <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center group-hover:scale-110 transition">
+                        <PhoneCall className="w-8 h-8" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">Voice Call</h3>
+                    <p className="text-white/90">
+                      Private audio conversation with a counselor
+                    </p>
+                  </button>
+                </div>
+
+                <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <p className="text-sm text-blue-800">
+                    🔒 All calls are private and confidential. Average wait time: 2-5 minutes
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-center mb-8">
+                  <div className="flex justify-center mb-4">
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
+                      callType === 'video' ? 'bg-orange-100 text-orange-500' : 'bg-pink-100 text-pink-500'
+                    }`}>
+                      {callType === 'video' ? <Video className="w-8 h-8" /> : <PhoneCall className="w-8 h-8" />}
+                    </div>
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                    {callType === 'video' ? 'Video Call' : 'Voice Call'} Session
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    Connecting you with an available counselor...
+                  </p>
+                </div>
+
+                {/* Simulated Call Interface */}
+                <div className="bg-gray-900 rounded-2xl aspect-video mb-6 flex items-center justify-center relative overflow-hidden">
+                  {callType === 'video' && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-pink-400/20" />
+                  )}
+                  <div className="text-center z-10">
+                    <div className="animate-pulse mb-4">
+                      {callType === 'video' ? (
+                        <Video className="w-16 h-16 text-white mx-auto" />
+                      ) : (
+                        <PhoneCall className="w-16 h-16 text-white mx-auto" />
+                      )}
+                    </div>
+                    <p className="text-white text-lg font-semibold">Connecting...</p>
+                    <p className="text-white/70 text-sm mt-2">Please wait while we find an available counselor</p>
+                  </div>
+                </div>
+
+                {/* Call Controls */}
+                <div className="flex justify-center gap-4">
+                  <button className="bg-green-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-green-600 transition flex items-center gap-2">
+                    <PhoneCall className="w-5 h-5" />
+                    Accept
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowChatModal(false);
+                      setCallType(null);
+                    }}
+                    className="bg-red-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-600 transition flex items-center gap-2"
+                  >
+                    <X className="w-5 h-5" />
+                    End Call
+                  </button>
+                </div>
+
+                <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                  <p className="text-sm text-yellow-800">
+                    💡 <strong>Demo Mode:</strong> This is a demonstration. In production, this would connect to a real counselor via WebRTC.
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
