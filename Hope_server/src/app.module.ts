@@ -34,7 +34,7 @@ import { MessagesModule } from './messages/messages.module';
     UsersModule,
     StudentsModule,
     ProgramsModule,
-    SessionsModule,
+    ...(process.env.DISABLE_DATABASE !== 'true' ? [SessionsModule] : []),
     SupportRequestsModule,
     DashboardModule,
     DonationsModule,
