@@ -19,7 +19,7 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: ['http://localhost:3001', 'https://hope-platform-4dtibdt2y-yvettes-projects-a1c8b4e6.vercel.app'],
     credentials: true,
   });
 
