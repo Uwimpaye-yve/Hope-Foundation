@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd Hope_client && npm install && npm run build",
+  "devCommand": "cd Hope_client && npm run dev",
+  "installCommand": "cd Hope_client && npm install",
+  "framework": null,
+  "outputDirectory": "Hope_client/.next"
+}
