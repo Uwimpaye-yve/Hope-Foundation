@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: hope_postgres
+    environment:
+      POSTGRES_DB: hope_platform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./Hope_server/database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - hope_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./Hope_server
+      dockerfile: Dockerfile
+    container_name: hope_backend
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/hope_platform
+      JWT_SECRET: your-production-jwt-secret-key
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    volumes:
+      - ./Hope_server/uploads:/app/uploads
+    networks:
+      - hope_network
+
+  # Frontend
+  frontend:
+    build:
+      context: ./Hope_client
+      dockerfile: Dockerfile
+    container_name: hope_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+    networks:
+      - hope_network
+
+volumes:
+  postgres_data:
+
+networks:
+  hope_network:
+    driver: bridge

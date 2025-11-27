@@ -1,0 +1,27 @@
+{
+  "name": "hope-foundation",
+  "version": "1.0.0",
+  "description": "Hope Foundation - Full Stack Application for Children's Support",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd Hope_server && npm run start:dev",
+    "dev:frontend": "cd Hope_client && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd Hope_server && npm run build",
+    "build:frontend": "cd Hope_client && npm run build",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd Hope_server && npm run start:prod",
+    "start:frontend": "cd Hope_client && npm start",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "db:setup": "psql -U postgres -d hope_foundation -f Hope_server/database/schema.sql",
+    "install:all": "npm install && cd Hope_server && npm install && cd ../Hope_client && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": ["hope", "foundation", "children", "support", "nestjs", "nextjs"],
+  "author": "Hope Foundation Team",
+  "license": "MIT"
+}
