@@ -30,7 +30,7 @@ export default function AdminDashboard() {
     totalStudents: 0,
     activePrograms: 15,
     supportRequests: 0,
-    successRate: 50
+    successRate: 50,
   });
   const [displayCount, setDisplayCount] = useState(5);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const token = authService.getToken();
     if (!token) {
-      router.push('/Login');
+      router.push("/Login");
       return;
     }
     fetchData();
@@ -48,33 +48,35 @@ export default function AdminDashboard() {
     try {
       const [statsData, studentsData] = await Promise.all([
         authService.getAdminStats(),
-        authService.getAllStudents()
+        authService.getAllStudents(),
       ]);
       setStats(statsData);
-      setStudents(studentsData.map((s: any) => ({
-        id: s.id,
-        name: s.name || `${s.firstName || ''} ${s.lastName || ''}`.trim(),
-        age: s.age || 0,
-        programs: s.programs || 0,
-        lastActive: formatDate(s.lastActive),
-        avatar: s.avatar || (s.name ? s.name.charAt(0).toUpperCase() : 'S'),
-        avatarColor: s.avatarColor || 'bg-orange-400'
-      })));
+      setStudents(
+        studentsData.map((s: any) => ({
+          id: s.id,
+          name: s.name || `${s.firstName || ""} ${s.lastName || ""}`.trim(),
+          age: s.age || 0,
+          programs: s.programs || 0,
+          lastActive: formatDate(s.lastActive),
+          avatar: s.avatar || (s.name ? s.name.charAt(0).toUpperCase() : "S"),
+          avatarColor: s.avatarColor || "bg-orange-400",
+        }))
+      );
     } catch (error) {
-      console.error('Failed to fetch data:', error);
+      console.error("Failed to fetch data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return 'Recently';
+    if (!dateString) return "Recently";
     const date = new Date(dateString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 24) return 'Today';
-    if (hours < 48) return 'Yesterday';
+    if (hours < 24) return "Today";
+    if (hours < 48) return "Yesterday";
     return `${Math.floor(hours / 24)} days ago`;
   };
 
@@ -98,8 +100,8 @@ export default function AdminDashboard() {
               Manage students, programs, and track impact
             </p>
           </div>
-          <button 
-            onClick={() => router.push('/dashboard/admin/add-student')}
+          <button
+            onClick={() => router.push("/dashboard/admin/add-student")}
             className="bg-orange-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-orange-600 transition-all flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
@@ -107,8 +109,8 @@ export default function AdminDashboard() {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <div 
-            onClick={() => router.push('/dashboard/admin/students')}
+          <div
+            onClick={() => router.push("/dashboard/admin/students")}
             className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-4">
@@ -117,13 +119,15 @@ export default function AdminDashboard() {
                 <Users className="w-5 h-5 text-orange-500" />
               </div>
             </div>
-            <div className="text-4xl font-bold text-gray-800 mb-2">{stats.totalStudents}</div>
+            <div className="text-4xl font-bold text-gray-800 mb-2">
+              {stats.totalStudents}
+            </div>
             <div className="text-green-500 text-sm font-medium">
               Click to view all
             </div>
           </div>
-          <div 
-            onClick={() => router.push('/dashboard/admin/programs')}
+          <div
+            onClick={() => router.push("/dashboard/admin/programs")}
             className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-4">
@@ -132,13 +136,15 @@ export default function AdminDashboard() {
                 <BookOpen className="w-5 h-5 text-pink-500" />
               </div>
             </div>
-            <div className="text-4xl font-bold text-gray-800 mb-2">{stats.activePrograms}</div>
+            <div className="text-4xl font-bold text-gray-800 mb-2">
+              {stats.activePrograms}
+            </div>
             <div className="text-green-500 text-sm font-medium">
               All running smoothly
             </div>
           </div>
-          <div 
-            onClick={() => router.push('/dashboard/counselor/support')}
+          <div
+            onClick={() => router.push("/dashboard/counselor/support")}
             className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
           >
             <div className="flex items-center justify-between mb-4">
@@ -149,7 +155,9 @@ export default function AdminDashboard() {
                 <Heart className="w-5 h-5 text-red-500" />
               </div>
             </div>
-            <div className="text-4xl font-bold text-gray-800 mb-2">{stats.supportRequests}</div>
+            <div className="text-4xl font-bold text-gray-800 mb-2">
+              {stats.supportRequests}
+            </div>
             <div className="text-orange-500 text-sm font-medium">
               Click to view
             </div>
@@ -161,7 +169,9 @@ export default function AdminDashboard() {
                 <TrendingUp className="w-5 h-5 text-green-500" />
               </div>
             </div>
-            <div className="text-4xl font-bold text-gray-800 mb-2">{stats.successRate}%</div>
+            <div className="text-4xl font-bold text-gray-800 mb-2">
+              {stats.successRate}%
+            </div>
             <div className="text-green-500 text-sm font-medium">
               +5% from last month
             </div>
@@ -186,10 +196,14 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-4 mb-6">
               {loading ? (
-                <div className="text-center py-8 text-gray-500">Loading students...</div>
+                <div className="text-center py-8 text-gray-500">
+                  Loading students...
+                </div>
               ) : displayedStudents.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  {searchQuery ? 'No students found' : 'No students yet. Add students to get started.'}
+                  {searchQuery
+                    ? "No students found"
+                    : "No students yet. Add students to get started."}
                 </div>
               ) : (
                 displayedStudents.map((student) => (
@@ -205,10 +219,11 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-800">
-                          {student.name || 'Unnamed Student'}
+                          {student.name || "Unnamed Student"}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {student.age > 0 ? `Age ${student.age} • ` : ''}{student.programs} programs
+                          {student.age > 0 ? `Age ${student.age} • ` : ""}
+                          {student.programs} programs
                         </p>
                       </div>
                     </div>
@@ -216,8 +231,10 @@ export default function AdminDashboard() {
                       <span className="text-sm text-gray-500">
                         {student.lastActive}
                       </span>
-                      <button 
-                        onClick={() => router.push(`/dashboard/admin/students/${student.id}`)}
+                      <button
+                        onClick={() =>
+                          router.push(`/dashboard/admin/students/${student.id}`)
+                        }
                         className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition"
                       >
                         View
@@ -228,8 +245,8 @@ export default function AdminDashboard() {
               )}
             </div>
             {hasMore && (
-              <button 
-                onClick={() => setDisplayCount(prev => prev + 5)}
+              <button
+                onClick={() => setDisplayCount((prev) => prev + 5)}
                 className="w-full py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition"
               >
                 Load More Students
@@ -241,33 +258,39 @@ export default function AdminDashboard() {
               Quick actions
             </h2>
             <div className="space-y-3">
-              <button 
-                onClick={() => router.push('/dashboard/admin/add-student')}
+              <button
+                onClick={() => router.push("/dashboard/admin/add-student")}
                 className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-left"
               >
                 <Plus className="w-5 h-5 text-gray-600" />
                 <span className="font-medium text-gray-700">Add Student</span>
               </button>
-              <button 
-                onClick={() => router.push('/dashboard/admin/programs')}
+              <button
+                onClick={() => router.push("/dashboard/admin/programs")}
                 className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-left"
               >
                 <BookOpen className="w-5 h-5 text-gray-600" />
-                <span className="font-medium text-gray-700">Create Program</span>
+                <span className="font-medium text-gray-700">
+                  Create Program
+                </span>
               </button>
-              <button 
-                onClick={() => router.push('/dashboard/counselor/support')}
+              <button
+                onClick={() => router.push("/dashboard/counselor/support")}
                 className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-left"
               >
                 <Heart className="w-5 h-5 text-gray-600" />
-                <span className="font-medium text-gray-700">View Support Request</span>
+                <span className="font-medium text-gray-700">
+                  View Support Request
+                </span>
               </button>
-              <button 
-                onClick={() => router.push('/dashboard/admin/reports')}
+              <button
+                onClick={() => router.push("/dashboard/admin/reports")}
                 className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition text-left"
               >
                 <TrendingUp className="w-5 h-5 text-gray-600" />
-                <span className="font-medium text-gray-700">Generate Report</span>
+                <span className="font-medium text-gray-700">
+                  Generate Report
+                </span>
               </button>
             </div>
           </div>
@@ -277,8 +300,8 @@ export default function AdminDashboard() {
             <h2 className="text-3xl font-bold text-gray-800">
               Program Overview
             </h2>
-            <button 
-              onClick={() => router.push('/dashboard/admin/programs')}
+            <button
+              onClick={() => router.push("/dashboard/admin/programs")}
               className="bg-orange-500 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-orange-600 transition-all flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
@@ -341,7 +364,9 @@ export default function AdminDashboard() {
                   <p className="text-sm text-gray-600 mb-1">
                     {student.name} joined the platform
                   </p>
-                  <span className="text-xs text-gray-500">{student.lastActive}</span>
+                  <span className="text-xs text-gray-500">
+                    {student.lastActive}
+                  </span>
                 </div>
               ))}
               {students.length === 0 && (
@@ -356,8 +381,8 @@ export default function AdminDashboard() {
             <p className="text-white/90 mb-4">
               Review and publish new success stories
             </p>
-            <button 
-              onClick={() => router.push('/stories')}
+            <button
+              onClick={() => router.push("/stories")}
               className="w-full bg-pink-200 text-gray-800 py-3 rounded-full font-semibold hover:bg-pink-300 transition"
             >
               View Submissions

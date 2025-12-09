@@ -1,7 +1,11 @@
 {
-  "buildCommand": "cd Hope_client && npm install && npm run build",
-  "devCommand": "cd Hope_client && npm run dev",
+  "buildCommand": "cd Hope_client && npm run build",
   "installCommand": "cd Hope_client && npm install",
-  "framework": null,
-  "outputDirectory": "Hope_client/.next"
+  "outputDirectory": "Hope_client/.next",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/Hope_client/$1"
+    }
+  ]
 }
